@@ -97,7 +97,17 @@ createUsernames(accounts);
 // #E-4
 const calcDisplayBalance = function (movements) {
   const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance}€`;
+  labelBalance.textContent = `${balance.toFixed(2)}€`;
+  return balance;
+};
+// #E-8
+const updateUI = function (acc) {
+  // Display movements
+  displayMovements(acc.movements);
+  // Display balance
+  calcDisplayBalance(acc.movements);
+  // Display summary
+  calcDisplaySummary(acc);
 };
 
 // #E-5
@@ -114,9 +124,9 @@ const calcDisplaySummary = function (account) {
     .filter((deposit, i, arr) => deposit >= 1)
     .reduce((acc, deposit) => acc + deposit, 0);
 
-  labelSumIn.textContent = `${incomes}€`;
-  labelSumOut.textContent = `${Math.abs(out)}€`;
-  labelSumInterest.textContent = `${Math.abs(interest)}€`;
+  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
+  labelSumOut.textContent = `${out.toFixed(2)}€`;
+  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
 };
 
 // #E-6
@@ -139,11 +149,29 @@ btnLogin.addEventListener("click", function (e) {
     inputLoginPin.value = inputLoginUsername.value = "";
     inputLoginUsername.blur();
     inputLoginPin.blur();
-    // Display movements
-    displayMovements(currentAccount.movements);
-    // Display balance
-    calcDisplayBalance(currentAccount.movements);
-    // Display summary
-    calcDisplaySummary(currentAccount);
+    updateUI(currentAccount);
   }
+});
+// #E-7
+btnTransfer.addEventListener("click", function (e) {
+  e.preventDefault();
+  const receiverAccount = accounts.find(
+    (el) => el.username === inputTransferTo.value
+  );
+  const sendingAmount = Number(inputTransferAmount.value);
+
+  if (
+    receiverAccount &&
+    receiverAccount.username !== currentAccount.username &&
+    calcDisplayBalance(currentAccount.movements) >= sendingAmount &&
+    sendingAmount > 0
+  ) {
+    receiverAccount.movements.push(sendingAmount);
+    currentAccount.movements.push(-sendingAmount);
+    updateUI(currentAccount);
+  }
+  // Clear input fields
+  inputTransferAmount.value = inputTransferTo.value = "";
+  inputTransferAmount.blur();
+  inputTransferTo.blur();
 });
