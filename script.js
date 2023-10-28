@@ -196,3 +196,20 @@ btnClose.addEventListener("click", function (e) {
   inputClosePin.blur();
   inputCloseUsername.blur();
 });
+
+// #E-10
+// Loan Rule: if there is atleast one deposit with atleast 10% of the requested loan amount.
+
+btnLoan.addEventListener("click", function (e) {
+  e.preventDefault();
+  const loanAmount = Number(inputLoanAmount.value);
+  if (
+    loanAmount > 0 &&
+    currentAccount.movements.some((mov) => mov >= loanAmount * 0.1)
+  ) {
+    currentAccount.movements.push(loanAmount);
+    updateUI(currentAccount);
+  }
+  inputLoanAmount.value = "";
+  inputLoanAmount.blur();
+});
