@@ -17,9 +17,9 @@ const account1 = {
     "2020-01-28T09:15:04.904Z",
     "2020-04-01T10:17:24.185Z",
     "2020-05-08T14:11:59.604Z",
-    "2020-05-27T17:01:17.194Z",
-    "2020-07-11T23:36:17.929Z",
-    "2020-07-12T10:51:36.790Z",
+    "2023-10-23T17:01:17.194Z",
+    "2023-10-26T23:36:17.929Z",
+    "2023-10-28T10:51:36.790Z",
   ],
   currency: "EUR",
   locale: "pt-PT", // de-DE
@@ -39,7 +39,7 @@ const account2 = {
     "2020-02-05T16:33:06.386Z",
     "2020-04-10T14:43:26.374Z",
     "2020-06-25T18:49:59.371Z",
-    "2020-07-26T12:01:20.894Z",
+    "2023-10-28T12:01:20.894Z",
   ],
   currency: "USD",
   locale: "en-US",
@@ -121,6 +121,32 @@ const currentDate = function (date = Date.now()) {
   )}:${`${now.getMinutes()}`.padStart(2, "0")}`;
 };
 
+const calcDaysPassed = function (actualDate) {
+  const time = new Date();
+  const displayDate = new Date(actualDate).getTime();
+  const elapsedTimeToday =
+    (time.getTime() -
+      new Date(
+        time.getFullYear(),
+        time.getMonth(),
+        time.getDate(),
+        0,
+        0
+      ).getTime()) /
+    (1000 * 60 * 60 * 24);
+  const daysPassed =
+    (new Date().getTime() - displayDate) / (1000 * 60 * 60 * 24);
+
+  if (daysPassed <= elapsedTimeToday)
+    return "Today," + currentDate(actualDate).slice(11);
+  else if (daysPassed <= elapsedTimeToday + 1)
+    return "Yesterday," + currentDate(actualDate).slice(11);
+  else if (daysPassed <= elapsedTimeToday + 7)
+    return (
+      `${Math.ceil(daysPassed)} days ago,` + currentDate(actualDate).slice(11)
+    );
+  else return currentDate(actualDate);
+};
 // #E-2 (creating displayMovements function)
 const displayMovements = function (acc, sort = false) {
   containerMovements.innerHTML = "";
@@ -139,7 +165,7 @@ const displayMovements = function (acc, sort = false) {
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-    <div class="movements__date">${currentDate(acc.movementsDates[i])}</div>
+    <div class="movements__date">${calcDaysPassed(acc.movementsDates[i])}</div>
       <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
     `;
