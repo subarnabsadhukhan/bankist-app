@@ -61,7 +61,7 @@ const account3 = {
     "2020-07-26T12:01:20.894Z",
   ],
   currency: "INR",
-  locale: "en-IN",
+  locale: "pt-PT",
 };
 
 const account4 = {
@@ -70,9 +70,6 @@ const account4 = {
   interestRate: 1,
   pin: 4444,
   movementsDates: [
-    "2019-11-30T09:48:16.867Z",
-    "2019-12-25T06:04:23.907Z",
-    "2020-05-27T17:01:17.194Z",
     "2020-07-11T23:36:17.929Z",
     "2020-07-12T10:51:36.790Z",
     "2021-04-10T14:43:26.374Z",
@@ -80,7 +77,7 @@ const account4 = {
     "2021-07-26T12:01:20.894Z",
   ],
   currency: "USD",
-  locale: "en-US",
+  locale: "hi-IN",
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -111,17 +108,19 @@ const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 
-const currentDate = function (date = Date.now()) {
+const currentDate = function (date = Date.now(), locale = "en-US") {
   const now = new Date(date);
-  return `${`${now.getDate()}`.padStart(2, "0")}/${`${
-    now.getMonth() + 1
-  }`.padStart(2, "0")}/${now.getFullYear()}, ${`${now.getHours()}`.padStart(
-    2,
-    "0"
-  )}:${`${now.getMinutes()}`.padStart(2, "0")}`;
+  const options = {
+    hour: "numeric",
+    minute: "numeric",
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  };
+  return new Intl.DateTimeFormat(locale, options).format(now);
 };
 
-const calcDaysPassed = function (actualDate) {
+const calcDaysPassed = function (actualDate, acc) {
   const time = new Date();
   const displayDate = new Date(actualDate).getTime();
   const elapsedTimeToday =
@@ -138,14 +137,15 @@ const calcDaysPassed = function (actualDate) {
     (new Date().getTime() - displayDate) / (1000 * 60 * 60 * 24);
 
   if (daysPassed <= elapsedTimeToday)
-    return "Today," + currentDate(actualDate).slice(11);
+    return "Today," + currentDate(actualDate, acc.locale).slice(11);
   else if (daysPassed <= elapsedTimeToday + 1)
-    return "Yesterday," + currentDate(actualDate).slice(11);
+    return "Yesterday," + currentDate(actualDate, acc.locale).slice(11);
   else if (daysPassed <= elapsedTimeToday + 7)
     return (
-      `${Math.ceil(daysPassed)} days ago,` + currentDate(actualDate).slice(11)
+      `${Math.ceil(daysPassed)} days ago,` +
+      currentDate(actualDate, acc.locale).slice(11)
     );
-  else return currentDate(actualDate);
+  else return currentDate(actualDate, acc.locale);
 };
 // #E-2 (creating displayMovements function)
 const displayMovements = function (acc, sort = false) {
@@ -165,7 +165,10 @@ const displayMovements = function (acc, sort = false) {
       <div class="movements__type movements__type--${type}">${
       i + 1
     } ${type}</div>
-    <div class="movements__date">${calcDaysPassed(acc.movementsDates[i])}</div>
+    <div class="movements__date">${calcDaysPassed(
+      acc.movementsDates[i],
+      acc
+    )}</div>
       <div class="movements__value">${mov.toFixed(2)}€</div>
     </div>
     `;
@@ -239,7 +242,7 @@ btnLogin.addEventListener("click", function (e) {
     labelWelcome.textContent = `Welcome Back, ${
       currentAccount.owner.split(" ")[0]
     }`;
-    labelDate.textContent = currentDate();
+    labelDate.textContent = currentDate(undefined, currentAccount.locale);
     // Clear input fields
     inputLoginPin.value = inputLoginUsername.value = "";
     inputLoginUsername.blur();
