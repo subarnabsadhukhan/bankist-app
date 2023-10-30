@@ -185,6 +185,28 @@ const displayMovements = function (acc, sort = false) {
     containerMovements.insertAdjacentHTML("afterbegin", html);
   });
 };
+const logOutTimer = function () {
+  let time = 180;
+  const tick = () => {
+    labelTimer.textContent = `${`${(time / 60).toFixed(0)}`.padStart(
+      2,
+      0
+    )}:${`${(time % 60).toFixed(0)}`.padStart(2, 0)}`;
+
+    if (time === 0) {
+      clearInterval(timer);
+      // Hide UI
+      containerApp.style.opacity = 0;
+      // Change Welcome Message
+      labelWelcome.textContent = `Log in to get started`;
+    }
+    time--;
+  };
+
+  tick();
+  const timer = setInterval(tick, 1000);
+  return timer;
+};
 
 // #E-3
 const createUsernames = function (accounts) {
@@ -252,7 +274,7 @@ const calcDisplaySummary = function (account) {
 };
 
 // #E-6
-let currentAccount;
+let currentAccount, timer;
 //// Event Handler
 btnLogin.addEventListener("click", function (e) {
   // Prevent form from Submitting
@@ -268,6 +290,10 @@ btnLogin.addEventListener("click", function (e) {
       currentAccount.owner.split(" ")[0]
     }`;
     labelDate.textContent = currentDate(undefined, currentAccount.locale);
+
+    // Timer Settings
+    if (timer) clearInterval(timer);
+    timer = logOutTimer();
     // Clear input fields
     inputLoginPin.value = inputLoginUsername.value = "";
     inputLoginUsername.blur();
@@ -301,6 +327,10 @@ btnTransfer.addEventListener("click", function (e) {
   inputTransferAmount.value = inputTransferTo.value = "";
   inputTransferAmount.blur();
   inputTransferTo.blur();
+
+  // Timer Settings
+  clearInterval(timer);
+  timer = logOutTimer();
 });
 // #E-9
 btnClose.addEventListener("click", function (e) {
@@ -343,6 +373,9 @@ btnLoan.addEventListener("click", function (e) {
   }
   inputLoanAmount.value = "";
   inputLoanAmount.blur();
+  // Timer Settings
+  clearInterval(timer);
+  timer = logOutTimer();
 });
 
 // #E-11
