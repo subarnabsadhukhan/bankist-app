@@ -61,7 +61,7 @@ const account3 = {
     "2020-07-26T12:01:20.894Z",
   ],
   currency: "INR",
-  locale: "pt-PT",
+  locale: "hi-IN",
 };
 
 const account4 = {
@@ -76,8 +76,8 @@ const account4 = {
     "2021-06-25T18:49:59.371Z",
     "2021-07-26T12:01:20.894Z",
   ],
-  currency: "USD",
-  locale: "hi-IN",
+  currency: "EUR",
+  locale: "de-DE",
 };
 
 const accounts = [account1, account2, account3, account4];
@@ -119,6 +119,11 @@ const currentDate = function (date = Date.now(), locale = "en-US") {
   };
   return new Intl.DateTimeFormat(locale, options).format(now);
 };
+const formatCurrency = (value, locale, currency) =>
+  new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency: currency,
+  }).format(value);
 
 const calcDaysPassed = function (actualDate, acc) {
   const time = new Date();
@@ -169,7 +174,11 @@ const displayMovements = function (acc, sort = false) {
       acc.movementsDates[i],
       acc
     )}</div>
-      <div class="movements__value">${mov.toFixed(2)}€</div>
+      <div class="movements__value">${formatCurrency(
+        mov.toFixed(2),
+        acc.locale,
+        acc.currency
+      )}</div>
     </div>
     `;
 
@@ -192,9 +201,13 @@ const createUsernames = function (accounts) {
 createUsernames(accounts);
 
 // #E-4
-const calcDisplayBalance = function (movements) {
-  const balance = movements.reduce((acc, mov) => acc + mov, 0);
-  labelBalance.textContent = `${balance.toFixed(2)}€`;
+const calcDisplayBalance = function (acc) {
+  const balance = acc.movements.reduce((acc, mov) => acc + mov, 0);
+  labelBalance.textContent = `${formatCurrency(
+    balance.toFixed(2),
+    acc.locale,
+    acc.currency
+  )}`;
   return balance;
 };
 // #E-8
@@ -202,7 +215,7 @@ const updateUI = function (acc) {
   // Display movements
   displayMovements(acc);
   // Display balance
-  calcDisplayBalance(acc.movements);
+  calcDisplayBalance(acc);
   // Display summary
   calcDisplaySummary(acc);
 };
@@ -221,9 +234,21 @@ const calcDisplaySummary = function (account) {
     .filter((deposit, i, arr) => deposit >= 1)
     .reduce((acc, deposit) => acc + deposit, 0);
 
-  labelSumIn.textContent = `${incomes.toFixed(2)}€`;
-  labelSumOut.textContent = `${out.toFixed(2)}€`;
-  labelSumInterest.textContent = `${interest.toFixed(2)}€`;
+  labelSumIn.textContent = `${formatCurrency(
+    incomes.toFixed(2),
+    account.locale,
+    account.currency
+  )}`;
+  labelSumOut.textContent = `${formatCurrency(
+    out.toFixed(2),
+    account.locale,
+    account.currency
+  )}`;
+  labelSumInterest.textContent = `${formatCurrency(
+    interest.toFixed(2),
+    account.locale,
+    account.currency
+  )}`;
 };
 
 // #E-6
@@ -261,7 +286,7 @@ btnTransfer.addEventListener("click", function (e) {
   if (
     receiverAccount &&
     receiverAccount.username !== currentAccount.username &&
-    calcDisplayBalance(currentAccount.movements) >= sendingAmount &&
+    calcDisplayBalance(currentAccount) >= sendingAmount &&
     sendingAmount > 0
   ) {
     receiverAccount.movements.push(sendingAmount);
